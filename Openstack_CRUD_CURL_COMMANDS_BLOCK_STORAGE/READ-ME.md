@@ -6,7 +6,7 @@
       Configure local.conf and start installation by runing ./stack.sh
 **Working on Devstack**:
     source devstack/openrc username project_name
-    Issue a token to communicate with the services: openstack issue token
+    Issue a token to communicate with the services: openstack issue token 
     
 **API_REFRENCE GUIDE USED**:
     https://docs.openstack.org/api-ref/block-storage/
