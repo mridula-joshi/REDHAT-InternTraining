@@ -20,7 +20,7 @@ Server: Apache/2.4.37 (centos) OpenSSL/1.1.1k mod_wsgi/4.6.4 Python/3.6
 Content-Type: application/json
 x-compute-request-id: req-6f761de5-01cd-46ae-ad01-eccc7165adfb
 Content-Length: 1498
-OpenStack-API-Version: volume 3.0
+OpenStack-API-Version: volume 3.0 
 Vary: OpenStack-API-Version
 x-openstack-request-id: req-6f761de5-01cd-46ae-ad01-eccc7165adfb
 Connection: close
