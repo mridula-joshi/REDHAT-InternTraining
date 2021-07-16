@@ -3,6 +3,9 @@ import sys
 import requests
 
 def communicate_api(endpoint,method,api,token):
+        if method not in ['GET','DELETE']:
+                print("Methods Accepted: GET|DELETE")
+                return
         try:
                 url1=endpoint + api
                 response=requests.request(method=method,url=url1,headers={"X-Auth-Token": token})
