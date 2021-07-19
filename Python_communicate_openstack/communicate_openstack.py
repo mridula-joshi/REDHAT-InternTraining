@@ -17,7 +17,7 @@ logging.addHandler(hdlr)
 
 class Communicate_with_api:
         
-        def communicate_api(args):
+        def communicate_api(self,args):
                 try:
                         url1=args.endpoint + args.api
                         response=requests.request(method=args.method,url=url1,headers={"X-Auth-Token": args.token})
