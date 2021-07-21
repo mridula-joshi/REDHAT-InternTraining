@@ -12,8 +12,8 @@ hdlr = RotatingFileHandler(filename ='opstck.log' , maxBytes=2000 , backupCount=
 hdlr.setFormatter(format)
 
 logger=logging.getLogger(__name__)
-logging.setLevel(logging.INFO)
-logging.addHandler(hdlr)
+logger.setLevel(logging.INFO)
+logger.addHandler(hdlr)
 
 class Communicate_with_api:
         
@@ -29,17 +29,18 @@ class Communicate_with_api:
                         logger.error("HTTP Error")
                 except Exception as e:
                         logger.warning("Exception %s", e)
+                print(resonse.status_code)
                 print(response.headers)
                 print(response.text)
         
 
         def main(self):
-        parser=argparse.ArgumentParser()
-        parser.add_argument("endpoint" , help=" Endpoint Url")
-        parser.add_argument("method" , help=" HTTP request method" , choice=['GET','DELETE'] , type= str)
-        parser.add_arument("api" , help="api_ref")
-        parser.add_argument("token" , help="Authorized token")
-        self.communicate_api(parser.parse_args())
+                parser=argparse.ArgumentParser()
+                parser.add_argument("endpoint" , help=" Endpoint Url")
+                parser.add_argument("method" , help=" HTTP request method" , choices=['GET','DELETE'] , type= str)
+                parser.add_argument("api" , help="api_ref")
+                parser.add_argument("token" , help="Authorized token")
+                self.communicate_api(parser.parse_args())
 
 if __name__ == "__main__":
         co=Communicate_with_api()
