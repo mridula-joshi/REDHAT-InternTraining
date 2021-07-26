@@ -19,10 +19,7 @@ import requests
 
 from logging.handlers import RotatingFileHandler
 
-format = logging.Formatter('% (asctime)s -
-                           % (name)s -
-                           % (levelname)s -
-                           % (message)s')
+format = logging.Formatter('% (asctime)s - % (name)s - % (levelname)s - % (message)s')
 hdlr = RotatingFileHandler(filename='opstck.log',
                            maxBytes=2000,
                            backupCount=10)
@@ -54,9 +51,24 @@ class Communicate_with_api:
                 print(response.headers)
                 print(response.text)
 
+        def endpoint_check(self, url):
+            regex = "(([0-9]|[1-9][0-9]|1[0-9][0-9]|"\
+                    "2[0-4][0-9]|25[0-5])\\.){3}"\
+                    "([0-9]|[1-9][0-9]|1[0-9][0-9]|"\
+                    "2[0-4][0-9]|25[0-5])"
+            pattern = re.compile(regex)
+
+            if url:
+                ip = re.search(pattern, url)
+                if ip:
+                    return url
+
+            raise argparse.ArgumentTypeError("invalid endpoint")
+
         def main(self):
                 parser = argparse.ArgumentParser()
                 parser.add_argument("endpoint",
+                                    type=self.endpoint_check
                                     help=" Endpoint Url")
                 parser.add_argument("method",
                                     help=" HTTP request method",
