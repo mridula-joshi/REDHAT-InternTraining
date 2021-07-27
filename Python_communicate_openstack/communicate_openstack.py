@@ -11,77 +11,58 @@
 #  under the License.
 """ This will help to establish connection and communicate with the
     Openstack services using HTTP requests. """
-import argparse
-import re
 
 import requests
 from oslo_config import cfg
 from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
+
 CONF = cfg.CONF
-def parse_config():
+
+request_opts = [
+    cfg.StrOpt('endpoint', required=True),
+    cfg.StrOpt('method', choices=['GET', 'DELETE'], required=True),
+    cfg.StrOpt('api', required=True),
+    cfg.StrOpt('api_token', required='true')
+]
+
+CONF.register_opts(request_opts, group='api_requirements')
+
+def prepare():
     logging.register_options(CONF)
 
     config_files = cfg.find_config_files(project='trainee_2021', prog='communicate_openstack_oslo')
     CONF(project='trainee_2021', default_config_files=config_files)
-
-def setup_logger():
     logging.setup(CONF, 'trainee_2021')
-    return LOG
+
 
 class Communicate_with_api:
-    def communicate_api(self, args):
+    def communicate_api(self):
         try:
-            url1 = args.endpoint + args.api
-            response = requests.request(method=args.method,
+            url1 = CONF.api_requirements.endpoint + CONF.api_requirements.api
+            response = requests.request(method=CONF.api_requirements.method,
                                         url=url1,
                                         headers={"X-Auth-Token":
-                                                     args.token})
-        except request.exceptions.InvalidURL:
+                                                     CONF.api_requirements.api_token})
+        except requests.exceptions.InvalidURL:
             LOG.error("INVALID URL Error")
-        except request.exceptions.ConnectTimeout:
+        except requests.exceptions.ConnectTimeout:
             LOG.error("Connection Error")
-        except request.exceptions.HTTPError:
+        except requests.exceptions.HTTPError:
             LOG.error("HTTP Error")
         except Exception as e:
             LOG.warning("Exception %s", e)
-        print(resonse.status_code)
+        print(response.status_code)
         print(response.headers)
         print(response.text)
 
-    def endpoint_check(self, url):
-        regex = "(([0-9]|[1-9][0-9]|1[0-9][0-9]|" \
-                "2[0-4][0-9]|25[0-5])\\.){3}" \
-                "([0-9]|[1-9][0-9]|1[0-9][0-9]|" \
-                "2[0-4][0-9]|25[0-5])"
-        pattern = re.compile(regex)
-
-        if url:
-            ip = re.search(pattern, url)
-            if ip:
-                return url
-
-        raise argparse.ArgumentTypeError("invalid endpoint")
-
     def main(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("endpoint",
-                            type=self.endpoint_check,
-                            help=" Endpoint Url")
-        parser.add_argument("method",
-                            help=" HTTP request method",
-                            choices=['GET', 'DELETE'],
-                            type=str)
-        parser.add_argument("api",
-                            help="api_ref")
-        parser.add_argument("token",
-                            help="Authorized token")
-        self.communicate_api(parser.parse_args())
+        self.communicate_api()
 
 
 if __name__ == "__main__":
-    parse_config()
-    logg = setup_logger()
+    prepare()
+    LOG = logging.getLogger(__name__)
     co = Communicate_with_api()
     co.main()
+            
