@@ -23,38 +23,41 @@ request_opts = [
     cfg.StrOpt('endpoint', required=True),
     cfg.StrOpt('method', choices=['GET', 'DELETE'], required=True),
     cfg.StrOpt('api', required=True),
-    cfg.StrOpt('api_token', required='true')
+    cfg.StrOpt('api_token', required='True')
 ]
 
 CONF.register_opts(request_opts, group='api_requirements')
 
+
 def prepare():
     logging.register_options(CONF)
 
-    config_files = cfg.find_config_files(project='trainee_2021', prog='communicate_openstack_oslo')
-    CONF(project='trainee_2021', default_config_files=config_files)
+    config_files = cfg.find_config_files(project='trainee_2021',
+                                         prog='communicate_openstack_oslo')
+    CONF(project='trainee_2021',
+         default_config_files=config_files)
     logging.setup(CONF, 'trainee_2021')
 
 
-class Communicate_with_api:
+class CommunicateWithApi:
     def communicate_api(self):
         try:
-            url1 = CONF.api_requirements.endpoint + CONF.api_requirements.api
-            response = requests.request(method=CONF.api_requirements.method,
-                                        url=url1,
+            request_url = CONF.api_requirements.endpoint + CONF.api_requirements.api
+            respose = requests.request(method=CONF.api_requirements.method,
+                                        url=request_url,
                                         headers={"X-Auth-Token":
-                                                     CONF.api_requirements.api_token})
+                                                 CONF.api_requirements.api_token})
         except requests.exceptions.InvalidURL:
-            LOG.error("INVALID URL Error")
+            LOG.error("INVALID URL Error: %s" %(request_url))
         except requests.exceptions.ConnectTimeout:
             LOG.error("Connection Error")
         except requests.exceptions.HTTPError:
             LOG.error("HTTP Error")
         except Exception as e:
             LOG.warning("Exception %s", e)
-        print(response.status_code)
-        print(response.headers)
-        print(response.text)
+        LOG.debug(response.status_code)
+        LOG.debug(response.headers)
+        LOG.debug(response.text)
 
     def main(self):
         self.communicate_api()
@@ -65,4 +68,3 @@ if __name__ == "__main__":
     LOG = logging.getLogger(__name__)
     co = Communicate_with_api()
     co.main()
-            
