@@ -12,74 +12,59 @@
 """ This will help to establish connection and communicate with the
     Openstack services using HTTP requests. """
 
-import argparse
-import logging
-
 import requests
-
-from logging.handlers import RotatingFileHandler
-
-format = logging.Formatter('% (asctime)s - % (name)s - % (levelname)s - % (message)s')
-hdlr = RotatingFileHandler(filename='opstck.log',
-                           maxBytes=2000,
-                           backupCount=10)
-hdlr.setFormatter(format)
+from oslo_config import cfg
+from oslo_log import log as logging
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logger.addHandler(hdlr)
+CONF = cfg.CONF
+
+request_opts = [
+    cfg.StrOpt('endpoint', required=True),
+    cfg.StrOpt('method', choices=['GET', 'DELETE'], required=True),
+    cfg.StrOpt('api', required=True),
+    cfg.StrOpt('api_token', required='True')
+]
+
+CONF.register_opts(request_opts, group='api_requirements')
 
 
-class Communicate_with_api:
-        def communicate_api(self, args):
-                try:
-                        url1 = args.endpoint + args.api
-                        response = requests.request(method=args.method,
-                                                    url=url1,
-                                                    headers={"X-Auth-Token":
-                                                             args.token})
-                except request.exceptions.InvalidURL:
-                        logger.error("INVALID URL Error")
-                except request.exceptions.ConnectTimeout:
-                        logger.error("Connection Error")
-                except request.exceptions.HTTPError:
-                        logger.error("HTTP Error")
-                except Exception as e:
-                        logger.warning("Exception %s", e)
-                print(resonse.status_code)
-                print(response.headers)
-                print(response.text)
+def prepare():
+    logging.register_options(CONF)
 
-        def endpoint_check(self, url):
-            regex = "(([0-9]|[1-9][0-9]|1[0-9][0-9]|"\
-                    "2[0-4][0-9]|25[0-5])\\.){3}"\
-                    "([0-9]|[1-9][0-9]|1[0-9][0-9]|"\
-                    "2[0-4][0-9]|25[0-5])"
-            pattern = re.compile(regex)
+    config_files = cfg.find_config_files(project='trainee_2021',
+                                         prog='communicate_openstack_oslo')
+    CONF(project='trainee_2021',
+         default_config_files=config_files)
+    logging.setup(CONF, 'trainee_2021')
 
-            if url:
-                ip = re.search(pattern, url)
-                if ip:
-                    return url
 
-            raise argparse.ArgumentTypeError("invalid endpoint")
+class CommunicateWithApi:
+    def communicate_api(self):
+        try:
+            request_url = CONF.api_requirements.endpoint + CONF.api_requirements.api
+            respose = requests.request(method=CONF.api_requirements.method,
+                                        url=request_url,
+                                        headers={"X-Auth-Token":
+                                                 CONF.api_requirements.api_token})
+        except requests.exceptions.InvalidURL:
+            LOG.error("INVALID URL Error: %s" %(request_url))
+        except requests.exceptions.ConnectTimeout:
+            LOG.error("Connection Error")
+        except requests.exceptions.HTTPError:
+            LOG.error("HTTP Error")
+        except Exception as e:
+            LOG.warning("Exception %s", e)
+        LOG.debug(response.status_code)
+        LOG.debug(response.headers)
+        LOG.debug(response.text)
 
-        def main(self):
-                parser = argparse.ArgumentParser()
-                parser.add_argument("endpoint",
-                                    type=self.endpoint_check
-                                    help=" Endpoint Url")
-                parser.add_argument("method",
-                                    help=" HTTP request method",
-                                    choices=['GET', 'DELETE'],
-                                    type=str)
-                parser.add_argument("api",
-                                    help="api_ref")
-                parser.add_argument("token",
-                                    help="Authorized token")
-                self.communicate_api(parser.parse_args())
+    def main(self):
+        self.communicate_api()
+
 
 if __name__ == "__main__":
-        co = Communicate_with_api()
-        co.main()
+    prepare()
+    LOG = logging.getLogger(__name__)
+    co = Communicate_with_api()
+    co.main()
